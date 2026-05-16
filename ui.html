@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<title>DocLens</title>
+<style>
+  body { font-family: Arial, sans-serif; max-width: 860px; margin: 40px auto; padding: 0 20px; background: #f9f9f9; color: #222; }
+  h1 { font-size: 1.4rem; margin-bottom: 4px; }
+  .docs { font-size: 12px; color: #777; margin-bottom: 28px; }
+  .block { background: #fff; border: 1px solid #ddd; border-radius: 8px; padding: 18px 20px; margin-bottom: 18px; }
+  .q-label { font-size: 11px; font-weight: bold; color: #2d6a4f; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .q-text { font-size: 15px; font-weight: 600; margin-bottom: 14px; }
+  .a-label { font-size: 11px; color: #999; text-transform: uppercase; letter-spacing: 0.05em; margin-bottom: 6px; }
+  .a-text { font-size: 13.5px; line-height: 1.8; white-space: pre-wrap; color: #333; }
+  .sources { margin-top: 14px; padding-top: 12px; border-top: 1px solid #eee; font-size: 11px; color: #888; }
+  .src { display: inline-block; background: #f0f4f0; border: 1px solid #dde8dd; border-radius: 3px; padding: 2px 8px; margin: 2px 3px 2px 0; color: #2d6a4f; font-family: monospace; }
+  .err { color: #c00; background: #fff0f0; border: 1px solid #fcc; border-radius: 6px; padding: 16px; }
+</style>
+</head>
+<body>
+<h1>DocLens — Results</h1>
+<div class="docs" id="docs">loading...</div>
+<div id="root">loading results...</div>
+
+<script>
+fetch("results.json?t=" + Date.now())
+  .then(r => r.json())
+  .then(data => {
+    document.getElementById("docs").textContent = "Documents: " + (data.documents || []).join(", ");
+    const root = document.getElementById("root");
+    root.innerHTML = "";
+    data.results.forEach((item, i) => {
+      const srcs = (item.sources || []).map(s => `<span class="src">${s}</span>`).join("");
+      const div = document.createElement("div");
+      div.className = "block";
+      div.innerHTML = `
+        <div class="q-label">Question ${i + 1}</div>
+        <div class="q-text">${item.question}</div>
+        <div class="a-label">Answer</div>
+        <div class="a-text">${item.answer}</div>
+        ${srcs ? `<div class="sources">Sources: ${srcs}</div>` : ""}`;
+      root.appendChild(div);
+    });
+  })
+  .catch(() => {
+    document.getElementById("root").innerHTML =
+      '<div class="err">Run <b>python test.py</b> first, then open this file again.</div>';
+  });
+</script>
+</body>
+</html>
